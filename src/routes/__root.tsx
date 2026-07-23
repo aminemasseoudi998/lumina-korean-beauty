@@ -77,18 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Chae-un — Luminous Korean Skincare Rituals" },
+      { title: "Chae-un — Maison de soins coréens" },
       {
         name: "description",
         content:
-          "Chae-un is a Korean skincare house crafting bio-fermented serums, essences and rituals for luminous porcelain skin. Discover our beige-toned formulations.",
+          "Chae-un, maison de skincare coréen. Sérums bio-fermentés, essences et rituels pour une peau porcelaine lumineuse. Palette beige clair, esthétique éditoriale.",
       },
       { name: "author", content: "Chae-un" },
-      { property: "og:title", content: "Chae-un — Luminous Korean Skincare Rituals" },
+      { property: "og:title", content: "Chae-un — Maison de soins coréens" },
       {
         property: "og:description",
         content:
-          "Bio-fermented K-beauty formulations rooted in Korean apothecary tradition. Serums, essences and creams for a dewy, porcelain finish.",
+          "Formulations K-beauty bio-fermentées, ancrées dans l'apothicairerie coréenne. Sérums, essences et crèmes pour un fini porcelaine.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

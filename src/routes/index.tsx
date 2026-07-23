@@ -12,23 +12,30 @@ export const Route = createFileRoute("/")({
 });
 
 const products = [
-  { name: "Glow Rice Ferment Essence", size: "150ml", price: "€72", image: product1 },
-  { name: "Yeon-hwa Petal Cream", size: "50ml", price: "€88", image: product2 },
-  { name: "Mountain Dew Mist", size: "100ml", price: "€54", image: product3 },
-  { name: "Gyeol-go Sleeping Mask", size: "75ml", price: "€65", image: product4 },
+  { name: "Essence Ferment de Riz", size: "150ml", price: "72 €", image: product1, tag: "Best-seller" },
+  { name: "Crème Pétale Yeon-hwa", size: "50ml", price: "88 €", image: product2, tag: "Nouveau" },
+  { name: "Brume Rosée de Montagne", size: "100ml", price: "54 €", image: product3, tag: null },
+  { name: "Masque de Nuit Gyeol-go", size: "75ml", price: "65 €", image: product4, tag: "Édition Limitée" },
 ];
 
-const ingredients = ["Rice Ferment", "Ginseng Root", "Camellia Seed", "Bamboo Sap", "Mugwort", "Propolis"];
+const ingredients = [
+  "Ferment de Riz",
+  "Racine de Ginseng",
+  "Graine de Camélia",
+  "Sève de Bambou",
+  "Armoise Coréenne",
+  "Propolis Dorée",
+];
 
 const steps = [
-  { n: "01", title: "Deep Cleansing", body: "Dissolve impurities with fermented camellia oil, preserving the skin's moisture barrier." },
-  { n: "02", title: "Hydration Priming", body: "Open the moisture channels using micro-filtered rice water essence." },
-  { n: "03", title: "Active Infusion", body: "Deeply repair with high-potency ginseng saponins for cellular vitality." },
-  { n: "04", title: "Silk Sealing", body: "Lock in nourishment with a weightless ceramide layer for a porcelain finish." },
+  { n: "01", title: "Purification", body: "Dissoudre les impuretés à l'huile de camélia fermentée, en préservant la barrière hydrolipidique." },
+  { n: "02", title: "Hydratation", body: "Ouvrir les canaux de moisture grâce à l'essence d'eau de riz micro-filtrée." },
+  { n: "03", title: "Infusion Active", body: "Réparer en profondeur avec les saponines de ginseng de haute intensité." },
+  { n: "04", title: "Sceau de Soie", body: "Sceller la nourriture d'un voile de céramides pour un fini porcelaine." },
 ];
 
-function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
-  const ref = useRef<HTMLDivElement>(null);
+function useReveal<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
     const el = ref.current;
@@ -40,18 +47,35 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
           io.disconnect();
         }
       },
-      { threshold: 0.15 },
+      { threshold: 0.12 },
     );
     io.observe(el);
     return () => io.disconnect();
   }, []);
+  return { ref, visible };
+}
+
+function Reveal({
+  children,
+  delay = 0,
+  y = 28,
+  className = "",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  y?: number;
+  className?: string;
+}) {
+  const { ref, visible } = useReveal<HTMLDivElement>();
   return (
     <div
       ref={ref}
+      className={className}
       style={{
         opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(28px)",
-        transition: `opacity 1.1s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 1.1s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
+        transform: visible ? "translateY(0)" : `translateY(${y}px)`,
+        transition: `opacity 1.2s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 1.2s cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
+        willChange: "opacity, transform",
       }}
     >
       {children}
@@ -59,52 +83,184 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
   );
 }
 
-function Index() {
+function SplitHeading({ text, className = "", delay = 0 }: { text: string; className?: string; delay?: number }) {
+  const { ref, visible } = useReveal<HTMLHeadingElement>();
+  const words = text.split(" ");
   return (
-    <div className="min-h-screen bg-cream text-ink">
+    <h1 ref={ref} className={className} style={{ perspective: "1000px" }}>
+      {words.map((w, i) => (
+        <span key={i} className="inline-block overflow-hidden pb-[0.08em] mr-[0.22em] align-bottom">
+          <span
+            className="inline-block"
+            style={{
+              transform: visible ? "translateY(0) rotateX(0)" : "translateY(110%) rotateX(-40deg)",
+              opacity: visible ? 1 : 0,
+              transition: `transform 1.1s cubic-bezier(0.16,1,0.3,1) ${delay + i * 90}ms, opacity 1s ease ${delay + i * 90}ms`,
+              transformOrigin: "50% 100%",
+            }}
+          >
+            {w}
+          </span>
+        </span>
+      ))}
+    </h1>
+  );
+}
+
+function useParallax(strength = 0.15) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [offset, setOffset] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        const el = ref.current;
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const center = rect.top + rect.height / 2 - window.innerHeight / 2;
+          setOffset(-center * strength);
+        }
+        raf = 0;
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [strength]);
+  return { ref, offset };
+}
+
+function ParallaxImage({
+  src,
+  alt,
+  className = "",
+  strength = 0.08,
+  width,
+  height,
+  eager = false,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  strength?: number;
+  width: number;
+  height: number;
+  eager?: boolean;
+}) {
+  const { ref, offset } = useParallax(strength);
+  return (
+    <div ref={ref} className={`relative overflow-hidden ${className}`}>
+      <img
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        loading={eager ? "eager" : "lazy"}
+        className="h-[115%] w-full object-cover"
+        style={{
+          transform: `translate3d(0, ${offset}px, 0)`,
+          willChange: "transform",
+        }}
+      />
+    </div>
+  );
+}
+
+function Index() {
+  const [scrollY, setScrollY] = useState(0);
+  useEffect(() => {
+    const on = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", on, { passive: true });
+    return () => window.removeEventListener("scroll", on);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-cream text-ink selection:bg-ink selection:text-cream">
+      {/* Ambient background */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(60% 40% at 80% 10%, rgba(232,226,217,0.9), transparent 60%), radial-gradient(50% 40% at 10% 90%, rgba(245,241,234,0.9), transparent 60%)",
+        }}
+      />
+
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-ink/5 bg-cream/80 px-6 backdrop-blur-md lg:px-12">
-        <div className="text-sm font-medium uppercase tracking-[0.28em]">Chae-un</div>
-        <div className="hidden gap-10 text-xs uppercase tracking-[0.22em] md:flex">
-          <a href="#collections" className="transition-colors hover:text-taupe">Collections</a>
-          <a href="#ritual" className="transition-colors hover:text-taupe">The Ritual</a>
-          <a href="#about" className="transition-colors hover:text-taupe">About</a>
+      <nav className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-ink/5 bg-cream/70 px-6 backdrop-blur-xl lg:px-12">
+        <div className="flex items-center gap-3 text-sm font-medium uppercase tracking-[0.3em]">
+          <span className="size-1.5 rounded-full bg-ink" />
+          Chae-un
         </div>
-        <button className="text-xs uppercase tracking-[0.22em] transition-colors hover:text-taupe">
-          Cart (0)
-        </button>
+        <div className="hidden gap-10 text-xs uppercase tracking-[0.24em] md:flex">
+          <a href="#collections" className="relative transition-colors hover:text-taupe">Collections</a>
+          <a href="#ritual" className="relative transition-colors hover:text-taupe">Le Rituel</a>
+          <a href="#about" className="relative transition-colors hover:text-taupe">Maison</a>
+          <a href="#journal" className="relative transition-colors hover:text-taupe">Journal</a>
+        </div>
+        <div className="flex items-center gap-6">
+          <button className="text-xs uppercase tracking-[0.24em] transition-colors hover:text-taupe">FR / KR</button>
+          <button className="text-xs uppercase tracking-[0.24em] transition-colors hover:text-taupe">
+            Panier <span className="text-taupe">(0)</span>
+          </button>
+        </div>
       </nav>
 
       {/* Hero */}
-      <section className="relative overflow-hidden pt-12 pb-24 lg:pt-20 lg:pb-32">
-        <div className="mx-auto flex max-w-7xl flex-col px-6 lg:px-12">
-          <div className="mb-14 max-w-[22ch] animate-fade-in-up">
-            <p className="mb-6 text-[10px] font-medium uppercase tracking-[0.35em] text-taupe">
-              Seoul — Paris · Est. 2024
-            </p>
-            <h1 className="font-serif text-5xl leading-[0.95] font-medium text-balance italic lg:text-8xl">
-              The Luminous Breath of Morning Dew
-            </h1>
+      <section className="relative overflow-hidden pt-16 pb-24 lg:pt-24 lg:pb-40">
+        <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
+          <div className="mb-16 flex items-end justify-between gap-8">
+            <div className="max-w-[24ch]">
+              <Reveal>
+                <p className="mb-6 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.4em] text-taupe">
+                  <span className="h-px w-8 bg-taupe" />
+                  Séoul — Paris · Depuis 2024
+                </p>
+              </Reveal>
+              <SplitHeading
+                text="Le Souffle Lumineux de la Rosée"
+                className="font-serif text-[13vw] leading-[0.92] font-medium italic text-balance lg:text-[7.5rem]"
+              />
+            </div>
+            <Reveal delay={800} className="hidden max-w-[26ch] pb-4 lg:block">
+              <p className="text-sm leading-relaxed text-taupe">
+                Une maison de soins coréens née de la lente fermentation des saisons et de la
+                précision moléculaire contemporaine.
+              </p>
+            </Reveal>
           </div>
 
           <div className="grid grid-cols-12 items-end gap-6">
-            <Reveal delay={100}>
-              <div className="col-span-12 lg:col-span-12">
-                <div className="relative aspect-[4/5] w-full overflow-hidden rounded-lg bg-sand outline outline-1 -outline-offset-1 outline-black/5">
-                  <img
-                    src={heroBottle}
-                    alt="Chae-un frosted glass essence bottle resting on a limestone plinth in soft morning light"
-                    width={1200}
-                    height={1500}
-                    className="h-full w-full object-cover"
-                  />
+            <Reveal delay={200} className="col-span-12 lg:col-span-7">
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-md bg-sand outline outline-1 -outline-offset-1 outline-black/5">
+                <img
+                  src={heroBottle}
+                  alt="Flacon d'essence Chae-un sur un socle de calcaire, lumière du matin"
+                  width={1200}
+                  height={1500}
+                  className="h-full w-full object-cover"
+                  style={{
+                    transform: `translate3d(0, ${scrollY * 0.08}px, 0) scale(${1 + scrollY * 0.00015})`,
+                    willChange: "transform",
+                  }}
+                />
+                <div className="absolute top-6 left-6 flex items-center gap-3 rounded-full bg-cream/80 px-4 py-2 text-[10px] font-medium uppercase tracking-[0.28em] backdrop-blur-md">
+                  <span className="size-1.5 animate-pulse rounded-full bg-taupe" />
+                  Nouveau · Ferment Doré
+                </div>
+                <div className="absolute right-6 bottom-6 max-w-[18ch] text-right font-serif text-sm italic text-cream mix-blend-difference">
+                  N°01 — L'Éveil
                 </div>
               </div>
             </Reveal>
 
-            <div className="col-span-12 flex flex-col gap-8 lg:col-span-5">
-              <Reveal delay={250}>
-                <div className="relative aspect-video overflow-hidden rounded-lg bg-champagne outline outline-1 -outline-offset-1 outline-black/5">
+            <div className="col-span-12 flex flex-col gap-6 lg:col-span-5">
+              <Reveal delay={350}>
+                <div className="relative aspect-video overflow-hidden rounded-md bg-champagne outline outline-1 -outline-offset-1 outline-black/5">
                   <video
                     autoPlay
                     muted
@@ -114,33 +270,50 @@ function Index() {
                     className="h-full w-full object-cover"
                   >
                     <source
-                      src="https://cdn.coverr.co/videos/coverr-a-woman-applying-cream-to-her-face-9271/1080p.mp4"
+                      src="https://cdn.pixabay.com/video/2023/07/26/173049-849610807_large.mp4"
                       type="video/mp4"
                     />
                   </video>
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/20 via-transparent to-transparent" />
-                  <span className="absolute bottom-4 left-4 text-[10px] font-medium uppercase tracking-[0.25em] text-cream">
-                    The Ritual · in motion
-                  </span>
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/30 via-transparent to-transparent" />
+                  <div className="absolute right-4 bottom-4 flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.28em] text-cream">
+                    <span className="size-1.5 rounded-full bg-cream" />
+                    En mouvement
+                  </div>
                 </div>
               </Reveal>
-              <Reveal delay={400}>
-                <p className="max-w-[48ch] text-pretty leading-relaxed text-taupe">
-                  Rooted in ancestral fermentation techniques, our formulations honor the slow transition
-                  of seasons. Experience a finish as delicate as warm porcelain.
-                </p>
-                <div className="mt-6 flex gap-4">
+
+              <Reveal delay={500}>
+                <div className="grid grid-cols-3 gap-4 border-t border-ink/10 pt-6">
+                  <div>
+                    <p className="font-serif text-3xl italic">72h</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-taupe">Fermentation Froide</p>
+                  </div>
+                  <div>
+                    <p className="font-serif text-3xl italic">98%</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-taupe">Naturel</p>
+                  </div>
+                  <div>
+                    <p className="font-serif text-3xl italic">14</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-taupe">Actifs Brevetés</p>
+                  </div>
+                </div>
+              </Reveal>
+
+              <Reveal delay={650}>
+                <div className="mt-2 flex flex-wrap gap-3">
                   <a
                     href="#collections"
-                    className="rounded-full bg-ink px-8 py-3 text-sm font-medium text-cream ring-1 ring-ink transition-all hover:bg-taupe hover:ring-taupe"
+                    className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-ink px-8 py-3 text-sm font-medium text-cream ring-1 ring-ink"
                   >
-                    Begin the Ritual
+                    <span className="relative z-10">Commencer le Rituel</span>
+                    <span className="relative z-10 transition-transform group-hover:translate-x-1">→</span>
+                    <span className="absolute inset-0 -translate-x-full bg-taupe transition-transform duration-500 group-hover:translate-x-0" />
                   </a>
                   <a
                     href="#ritual"
-                    className="rounded-full border border-ink/20 px-8 py-3 text-sm font-medium text-ink transition-colors hover:bg-sand"
+                    className="inline-flex items-center gap-3 rounded-full border border-ink/20 px-8 py-3 text-sm font-medium text-ink transition-colors hover:bg-sand"
                   >
-                    Discover
+                    Découvrir la maison
                   </a>
                 </div>
               </Reveal>
@@ -149,55 +322,68 @@ function Index() {
         </div>
       </section>
 
-      {/* Ingredients Marquee */}
-      <div className="overflow-hidden border-y border-ink/5 bg-sand/50 py-12">
-        <div className="animate-marquee items-center gap-12">
+      {/* Marquee */}
+      <div className="relative overflow-hidden border-y border-ink/5 bg-sand/60 py-10">
+        <div className="animate-marquee items-center">
           {[...ingredients, ...ingredients, ...ingredients].map((ing, i) => (
-            <div key={i} className="flex shrink-0 items-center gap-12 px-6">
-              <span className="font-serif text-3xl italic text-ink whitespace-nowrap">{ing}</span>
-              <span className="size-1.5 shrink-0 rounded-full bg-taupe/50" />
+            <div key={i} className="flex shrink-0 items-center gap-10 px-6">
+              <span className="font-serif text-4xl italic text-ink whitespace-nowrap">{ing}</span>
+              <span className="text-taupe/50">✦</span>
             </div>
           ))}
         </div>
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-sand/60 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-sand/60 to-transparent" />
       </div>
 
       {/* Product Grid */}
-      <section id="collections" className="mx-auto max-w-7xl px-6 py-24 lg:px-12 lg:py-32">
+      <section id="collections" className="mx-auto max-w-[1400px] px-6 py-28 lg:px-12 lg:py-40">
         <Reveal>
-          <div className="mb-16 flex items-end justify-between">
+          <div className="mb-20 flex items-end justify-between gap-8">
             <div>
-              <p className="mb-4 text-[10px] font-medium uppercase tracking-[0.35em] text-taupe">
-                Selected Rituals
+              <p className="mb-5 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.4em] text-taupe">
+                <span className="h-px w-8 bg-taupe" />
+                Rituels Sélectionnés
               </p>
-              <h2 className="font-serif text-4xl font-medium lg:text-5xl">Curated Formulations</h2>
+              <h2 className="font-serif text-5xl font-medium leading-[0.95] lg:text-7xl">
+                Formulations <span className="italic">rares.</span>
+              </h2>
             </div>
-            <a href="#" className="border-b border-ink/20 pb-1 text-xs uppercase tracking-[0.22em] hover:border-ink">
-              View All
+            <a href="#" className="hidden items-center gap-3 border-b border-ink/20 pb-1 text-xs uppercase tracking-[0.24em] transition-colors hover:border-ink md:inline-flex">
+              Voir toute la collection <span>→</span>
             </a>
           </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2 lg:grid-cols-4">
           {products.map((p, i) => (
-            <Reveal key={p.name} delay={i * 120}>
-              <div className="group cursor-pointer">
-                <div className="relative mb-6 aspect-[3/4] overflow-hidden rounded-lg bg-sand outline outline-1 -outline-offset-1 outline-black/5">
+            <Reveal key={p.name} delay={i * 140}>
+              <div className={`group cursor-pointer ${i % 2 === 1 ? "lg:translate-y-16" : ""}`}>
+                <div className="relative mb-6 aspect-[3/4] overflow-hidden rounded-md bg-sand outline outline-1 -outline-offset-1 outline-black/5">
                   <img
                     src={p.image}
                     alt={p.name}
                     width={800}
                     height={1000}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-110"
                   />
-                  <div className="pointer-events-none absolute inset-0 bg-cream/0 transition-colors duration-700 group-hover:bg-cream/10" />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/25 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                  {p.tag && (
+                    <span className="absolute top-4 left-4 rounded-full bg-cream/80 px-3 py-1 text-[9px] font-medium uppercase tracking-[0.22em] backdrop-blur-md">
+                      {p.tag}
+                    </span>
+                  )}
+                  <span className="absolute right-4 bottom-4 inline-flex translate-y-3 items-center gap-2 rounded-full bg-cream px-4 py-2 text-[10px] font-medium uppercase tracking-[0.22em] opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+                    Ajouter <span>+</span>
+                  </span>
                 </div>
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="mb-1 text-sm font-medium">{p.name}</h3>
-                    <p className="text-xs uppercase tracking-widest text-taupe">{p.size}</p>
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-taupe">N°0{i + 1} · {p.size}</p>
+                    <h3 className="mt-1 font-serif text-xl">{p.name}</h3>
                   </div>
-                  <span className="text-sm">{p.price}</span>
+                  <span className="font-serif text-lg italic">{p.price}</span>
                 </div>
               </div>
             </Reveal>
@@ -205,64 +391,99 @@ function Index() {
         </div>
       </section>
 
-      {/* Philosophy split */}
-      <section id="about" className="bg-sand/40 py-24 lg:py-32">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-6 md:grid-cols-2 lg:px-12">
-          <Reveal>
+      {/* Philosophy */}
+      <section id="about" className="relative overflow-hidden bg-sand/50 py-28 lg:py-40">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-champagne opacity-60 blur-3xl"
+        />
+        <div className="relative mx-auto grid max-w-[1400px] grid-cols-1 items-center gap-16 px-6 lg:grid-cols-12 lg:px-12">
+          <Reveal className="lg:col-span-6">
             <div className="relative">
-              <img
+              <ParallaxImage
                 src={skinGlow}
-                alt="Close-up of dewy porcelain skin in warm morning light"
+                alt="Peau porcelaine illuminée par la lumière dorée du matin"
                 width={1200}
                 height={800}
-                loading="lazy"
-                className="aspect-[4/5] w-full rounded-lg object-cover outline outline-1 -outline-offset-1 outline-black/5"
+                className="aspect-[4/5] w-full rounded-md outline outline-1 -outline-offset-1 outline-black/5"
+                strength={0.06}
               />
-              <div className="absolute -right-4 -bottom-8 hidden w-52 bg-cream p-6 shadow-xl md:block">
+              <div className="absolute -right-4 -bottom-10 hidden w-60 rounded-md bg-cream p-6 shadow-2xl md:block">
                 <p className="text-xs italic leading-relaxed text-ink/70">
-                  "Inspired by the ancient porcelain rituals of the Joseon dynasty, quietly modernized."
+                  « Inspirée des rituels de porcelaine de la dynastie Joseon, discrètement modernisée. »
                 </p>
+                <p className="mt-4 text-[10px] uppercase tracking-[0.28em] text-taupe">— Studio de Séoul</p>
               </div>
             </div>
           </Reveal>
-          <Reveal delay={200}>
-            <p className="mb-6 text-[10px] font-medium uppercase tracking-[0.35em] text-taupe">
-              The Philosophy
-            </p>
-            <h2 className="mb-8 font-serif text-4xl leading-[1.05] font-medium lg:text-5xl">
-              Advanced science, <span className="italic">ancestral wisdom.</span>
-            </h2>
-            <p className="mb-10 max-w-md leading-relaxed text-taupe">
-              We believe in the power of patience. Every formulation undergoes a 72-hour cold-fermentation
-              process — ensuring active ingredients remain potent yet perfectly biocompatible with the
-              skin's natural barrier.
-            </p>
-            <a href="#ritual" className="group inline-flex items-center gap-4 text-[10px] font-medium uppercase tracking-[0.3em]">
-              Learn our process
-              <span className="block h-[1px] w-10 bg-ink transition-all duration-500 group-hover:w-20" />
-            </a>
-          </Reveal>
+          <div className="lg:col-span-6 lg:pl-8">
+            <Reveal delay={100}>
+              <p className="mb-6 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.4em] text-taupe">
+                <span className="h-px w-8 bg-taupe" />
+                La Philosophie
+              </p>
+            </Reveal>
+            <Reveal delay={200}>
+              <h2 className="mb-10 font-serif text-5xl font-medium leading-[1.02] lg:text-7xl">
+                Science avancée, <br />
+                <span className="italic text-taupe">sagesse ancestrale.</span>
+              </h2>
+            </Reveal>
+            <Reveal delay={350}>
+              <p className="mb-10 max-w-md leading-relaxed text-taupe">
+                Nous croyons au pouvoir de la patience. Chaque formulation traverse une fermentation à froid
+                de 72 heures — garantissant des actifs puissants et parfaitement biocompatibles avec la
+                barrière naturelle de la peau.
+              </p>
+            </Reveal>
+            <Reveal delay={500}>
+              <div className="grid max-w-md grid-cols-2 gap-8 border-t border-ink/10 pt-8">
+                <div>
+                  <p className="font-serif text-4xl italic">01.</p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.22em] text-taupe">Ferments vivants</p>
+                  <p className="mt-2 text-sm text-ink/70">Cultivés en petits lots dans nos ateliers de Séoul.</p>
+                </div>
+                <div>
+                  <p className="font-serif text-4xl italic">02.</p>
+                  <p className="mt-2 text-xs uppercase tracking-[0.22em] text-taupe">Sans compromis</p>
+                  <p className="mt-2 text-sm text-ink/70">Cruelty-free, vegan, éco-conçu de bout en bout.</p>
+                </div>
+              </div>
+            </Reveal>
+          </div>
         </div>
       </section>
 
       {/* Ritual steps */}
-      <section id="ritual" className="mx-auto max-w-7xl px-6 py-24 lg:px-12 lg:py-32">
+      <section id="ritual" className="mx-auto max-w-[1400px] px-6 py-28 lg:px-12 lg:py-40">
         <Reveal>
-          <div className="mb-20 text-center">
-            <p className="mb-4 text-[10px] font-medium uppercase tracking-[0.35em] text-taupe">
-              The Sequence
+          <div className="mb-24 grid grid-cols-1 items-end gap-8 lg:grid-cols-2">
+            <div>
+              <p className="mb-5 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.4em] text-taupe">
+                <span className="h-px w-8 bg-taupe" />
+                La Séquence
+              </p>
+              <h2 className="font-serif text-5xl font-medium leading-[0.95] lg:text-7xl">
+                Un rituel <span className="italic">en quatre gestes.</span>
+              </h2>
+            </div>
+            <p className="max-w-md text-taupe lg:justify-self-end">
+              Une chorégraphie lente inspirée de la cérémonie du thé coréenne — chaque geste prépare le
+              suivant, chaque texture révèle la prochaine.
             </p>
-            <h2 className="mx-auto max-w-[20ch] font-serif text-4xl font-medium text-balance lg:text-5xl">
-              A Four-Step Journey to Luminous Clarity
-            </h2>
           </div>
         </Reveal>
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4 lg:gap-10">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-14 md:grid-cols-2 lg:grid-cols-4">
           {steps.map((s, i) => (
-            <Reveal key={s.n} delay={i * 120}>
-              <div className="flex flex-col gap-5 border-t border-ink/10 pt-8">
-                <span className="font-serif text-5xl italic text-ink/25">{s.n}</span>
-                <h4 className="text-sm font-semibold uppercase tracking-[0.18em]">{s.title}</h4>
+            <Reveal key={s.n} delay={i * 140}>
+              <div className="group relative flex flex-col gap-5 border-t border-ink/15 pt-8 transition-colors hover:border-ink">
+                <div className="flex items-baseline justify-between">
+                  <span className="font-serif text-6xl italic text-ink/20 transition-colors group-hover:text-taupe">
+                    {s.n}
+                  </span>
+                  <span className="text-[10px] uppercase tracking-[0.24em] text-taupe">Étape</span>
+                </div>
+                <h4 className="font-serif text-2xl">{s.title}</h4>
                 <p className="text-pretty text-sm leading-relaxed text-taupe">{s.body}</p>
               </div>
             </Reveal>
@@ -271,51 +492,135 @@ function Index() {
       </section>
 
       {/* Testimonial */}
-      <section className="flex flex-col items-center px-6 py-28 text-center lg:py-40">
-        <Reveal>
-          <div className="max-w-[40ch]">
-            <p className="mb-8 font-serif text-3xl leading-tight italic text-balance lg:text-4xl">
-              "It feels like the softest silk unfolding on my skin. The glow isn't just on the surface —
-              it feels like it radiates from within."
+      <section className="relative overflow-hidden bg-ink py-32 text-cream lg:py-48">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-30"
+          style={{
+            background:
+              "radial-gradient(50% 40% at 50% 50%, rgba(232,226,217,0.35), transparent 70%)",
+          }}
+        />
+        <div className="relative mx-auto flex max-w-4xl flex-col items-center px-6 text-center">
+          <Reveal>
+            <p className="mb-10 flex items-center justify-center gap-3 text-[10px] font-medium uppercase tracking-[0.4em] text-cream/60">
+              <span className="h-px w-8 bg-cream/40" />
+              Témoignage
+              <span className="h-px w-8 bg-cream/40" />
             </p>
-            <span className="text-xs font-medium uppercase tracking-[0.25em] text-taupe">
-              Ji-won Park · Creative Director, Seoul
-            </span>
-          </div>
-        </Reveal>
+          </Reveal>
+          <Reveal delay={150}>
+            <p className="font-serif text-3xl leading-[1.15] italic text-balance lg:text-5xl">
+              « Une soie tiède qui se déploie sur la peau. La lumière ne reste pas en surface —
+              elle semble irradier de l'intérieur. »
+            </p>
+          </Reveal>
+          <Reveal delay={350}>
+            <div className="mt-12 flex items-center gap-4">
+              <span className="size-10 rounded-full bg-cream/20" />
+              <div className="text-left">
+                <p className="text-sm font-medium">Ji-won Park</p>
+                <p className="text-[10px] uppercase tracking-[0.28em] text-cream/60">Directrice artistique · Séoul</p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Journal / Newsletter */}
+      <section id="journal" className="mx-auto max-w-[1400px] px-6 py-28 lg:px-12 lg:py-40">
+        <div className="grid grid-cols-1 gap-16 lg:grid-cols-2">
+          <Reveal>
+            <div>
+              <p className="mb-5 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.4em] text-taupe">
+                <span className="h-px w-8 bg-taupe" />
+                Journal
+              </p>
+              <h3 className="mb-10 font-serif text-5xl font-medium leading-[1] lg:text-6xl">
+                La lettre du matin.
+              </h3>
+              <p className="mb-8 max-w-md text-taupe">
+                Rituels saisonniers, notes d'atelier et accès en avant-première à nos éditions limitées.
+              </p>
+              <form className="flex max-w-md items-center gap-4 border-b border-ink/20 pb-3" onSubmit={(e) => e.preventDefault()}>
+                <input
+                  type="email"
+                  placeholder="Votre adresse e-mail"
+                  className="flex-grow bg-transparent py-2 text-sm placeholder:text-taupe/60 focus:outline-none"
+                />
+                <button className="group inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em]">
+                  Rejoindre
+                  <span className="transition-transform group-hover:translate-x-1">→</span>
+                </button>
+              </form>
+            </div>
+          </Reveal>
+          <Reveal delay={200}>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <a href="#" className="group block">
+                <div className="mb-4 aspect-[4/5] overflow-hidden rounded-md bg-sand">
+                  <img src={product2} alt="Rituel du soir" className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
+                </div>
+                <p className="text-[10px] uppercase tracking-[0.24em] text-taupe">Rituel · 04 min</p>
+                <h4 className="mt-2 font-serif text-lg">Le geste du soir, revisité</h4>
+              </a>
+              <a href="#" className="group block sm:mt-16">
+                <div className="mb-4 aspect-[4/5] overflow-hidden rounded-md bg-sand">
+                  <img src={product3} alt="Fermentation" className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105" loading="lazy" />
+                </div>
+                <p className="text-[10px] uppercase tracking-[0.24em] text-taupe">Atelier · 06 min</p>
+                <h4 className="mt-2 font-serif text-lg">Dans nos ateliers de fermentation</h4>
+              </a>
+            </div>
+          </Reveal>
+        </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-ink py-24 text-cream">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-16 px-6 lg:grid-cols-2 lg:px-12">
-          <div className="flex flex-col gap-8">
-            <div className="text-2xl font-medium uppercase tracking-[0.28em]">Chae-un</div>
-            <p className="max-w-[35ch] text-pretty text-sm leading-relaxed text-cream/60">
-              A bridge between traditional Korean apothecary and modern dermatological art. Crafted in
-              small batches for those who seek the luminous.
-            </p>
-            <div className="flex gap-6 text-xs uppercase tracking-[0.22em] text-cream/50">
-              <a href="#" className="transition-colors hover:text-cream">Instagram</a>
-              <a href="#" className="transition-colors hover:text-cream">Journal</a>
-              <a href="#" className="transition-colors hover:text-cream">Stockists</a>
+      <footer className="bg-ink pt-24 pb-12 text-cream">
+        <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
+          <div className="grid grid-cols-1 gap-16 lg:grid-cols-12">
+            <div className="lg:col-span-5">
+              <div className="mb-6 text-2xl font-medium uppercase tracking-[0.3em]">Chae-un</div>
+              <p className="max-w-[36ch] text-pretty text-sm leading-relaxed text-cream/60">
+                Un pont entre l'apothicairerie coréenne et l'art dermatologique moderne. Fabriqué en
+                petites séries pour celles et ceux qui cherchent la lumière.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-7">
+              <div>
+                <h5 className="mb-5 text-[10px] font-medium uppercase tracking-[0.28em] text-cream/50">Maison</h5>
+                <ul className="space-y-3 text-sm">
+                  <li><a href="#" className="hover:text-taupe">Notre histoire</a></li>
+                  <li><a href="#" className="hover:text-taupe">Ateliers</a></li>
+                  <li><a href="#" className="hover:text-taupe">Journal</a></li>
+                </ul>
+              </div>
+              <div>
+                <h5 className="mb-5 text-[10px] font-medium uppercase tracking-[0.28em] text-cream/50">Boutique</h5>
+                <ul className="space-y-3 text-sm">
+                  <li><a href="#" className="hover:text-taupe">Sérums</a></li>
+                  <li><a href="#" className="hover:text-taupe">Crèmes</a></li>
+                  <li><a href="#" className="hover:text-taupe">Coffrets</a></li>
+                </ul>
+              </div>
+              <div>
+                <h5 className="mb-5 text-[10px] font-medium uppercase tracking-[0.28em] text-cream/50">Suivez-nous</h5>
+                <ul className="space-y-3 text-sm">
+                  <li><a href="#" className="hover:text-taupe">Instagram</a></li>
+                  <li><a href="#" className="hover:text-taupe">TikTok</a></li>
+                  <li><a href="#" className="hover:text-taupe">Pinterest</a></li>
+                </ul>
+              </div>
             </div>
           </div>
-          <div className="flex flex-col gap-8">
-            <h4 className="text-xs font-medium uppercase tracking-[0.28em]">The Morning Letter</h4>
-            <form className="flex gap-4 border-b border-cream/20 pb-2" onSubmit={(e) => e.preventDefault()}>
-              <input
-                type="email"
-                placeholder="Your email address"
-                className="flex-grow bg-transparent py-2 text-sm placeholder:text-cream/40 focus:outline-none"
-              />
-              <button type="submit" className="group flex items-center gap-2 py-2 text-xs uppercase tracking-[0.22em]">
-                Join
-                <span className="size-1 rounded-full bg-cream transition-transform group-hover:scale-[2.5]" />
-              </button>
-            </form>
-            <p className="text-[10px] uppercase tracking-[0.22em] text-cream/40">
-              © 2024 Chae-un Beauty. All rights reserved.
-            </p>
+          <div className="mt-20 flex flex-col items-start justify-between gap-6 border-t border-cream/10 pt-8 text-[10px] uppercase tracking-[0.24em] text-cream/40 md:flex-row md:items-center">
+            <span>© 2024 Chae-un Beauty · Fabriqué à Séoul et Paris</span>
+            <div className="flex gap-6">
+              <a href="#" className="hover:text-cream">Confidentialité</a>
+              <a href="#" className="hover:text-cream">Livraison</a>
+              <a href="#" className="hover:text-cream">Mentions légales</a>
+            </div>
           </div>
         </div>
       </footer>
