@@ -13,6 +13,11 @@
   --color-champagne: var(--champagne);
   --color-taupe: var(--taupe);
   --color-ink: var(--ink);
+  --color-tint: var(--tint);
+  --color-tint-deep: var(--tint-deep);
+  --color-camel: var(--camel);
+  --color-camel-deep: var(--camel-deep);
+  --color-camel-dark: var(--camel-dark);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -37,11 +42,18 @@
 :root {
   --radius: 0.5rem;
 
-  --cream: #fdfbf7;
-  --sand: #f5f1ea;
-  --champagne: #e8e2d9;
-  --taupe: #8c837a;
-  --ink: #2b2724;
+  --cream: #fffdf8;
+  --sand: #f8f3e9;
+  --champagne: #ece1cb;
+  --taupe: #6e6557; /* WCAG AA (5.6:1 on cream) for secondary text */
+  --ink: #3d3730;
+  /* Light beige tints for section backgrounds */
+  --tint: #fbf7ef;
+  --tint-deep: #f1e8d7;
+  /* Camel accent — buttons, badges, links */
+  --camel: #c8b18d; /* decorative accents only (rules, sparkles) */
+  --camel-deep: #786646; /* AA (5.4:1) — text labels & button fills */
+  --camel-dark: #5f4f36; /* button hover — darkens, keeps cream text readable */
 
   --background: var(--cream);
   --foreground: var(--ink);
@@ -69,6 +81,27 @@
     -webkit-font-smoothing: antialiased;
   }
   .font-serif { font-family: var(--font-serif); }
+
+  /* Visible keyboard focus for every interactive element.
+     :where() keeps specificity 0 so components that set their own ring win. */
+  :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-camel-deep);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+}
+
+/* Respect users who prefer reduced motion — neutralize marquees, entrance
+   transitions, hover motion and scrolled animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @keyframes marquee {

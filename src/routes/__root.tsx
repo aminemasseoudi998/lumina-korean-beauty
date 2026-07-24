@@ -7,10 +7,13 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { CartProvider } from "../lib/cart";
+import { FavoritesProvider } from "../lib/favorites";
+import { AuthProvider } from "../lib/auth";
+import { WhatsAppButton } from "../components/site/WhatsAppButton";
 
 function NotFoundComponent() {
   return (
@@ -37,9 +40,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -76,26 +76,29 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Chae-un — Maison de soins coréens" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { title: "Wglow — Cosmétiques coréens en Tunisie · Livraison 24h" },
       {
         name: "description",
         content:
-          "Chae-un, maison de skincare coréen. Sérums bio-fermentés, essences et rituels pour une peau porcelaine lumineuse. Palette beige clair, esthétique éditoriale.",
+          "Wglow, la maison de cosmétiques coréens (K-beauty) en Tunisie. Sérums, essences, crèmes et masques authentiques. Livraison 24h, paiement à la livraison partout en Tunisie.",
       },
-      { name: "author", content: "Chae-un" },
-      { property: "og:title", content: "Chae-un — Maison de soins coréens" },
+      { name: "author", content: "Wglow" },
+      { name: "theme-color", content: "#fdfbf7" },
+      { property: "og:title", content: "Wglow — Cosmétiques coréens en Tunisie" },
       {
         property: "og:description",
         content:
-          "Formulations K-beauty bio-fermentées, ancrées dans l'apothicairerie coréenne. Sérums, essences et crèmes pour un fini porcelaine.",
+          "Cosmétiques coréens authentiques en Tunisie : sérums, essences, crèmes et masques. Livraison 24h et paiement à la livraison.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/logo.png", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/logo.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -112,7 +115,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <head>
         <HeadContent />
       </head>
@@ -129,8 +132,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <AuthProvider>
+        <FavoritesProvider>
+          <CartProvider>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <Outlet />
+            <WhatsAppButton />
+          </CartProvider>
+        </FavoritesProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
