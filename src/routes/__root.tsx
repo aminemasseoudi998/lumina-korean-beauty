@@ -13,7 +13,10 @@ import appCss from "../styles.css?url";
 import { CartProvider } from "../lib/cart";
 import { FavoritesProvider } from "../lib/favorites";
 import { AuthProvider } from "../lib/auth";
+import { ProductsProvider } from "../lib/products-store";
+import { OrdersProvider } from "../lib/orders";
 import { WhatsAppButton } from "../components/site/WhatsAppButton";
+import { MobileTabBar } from "../components/site/MobileTabBar";
 
 function NotFoundComponent() {
   return (
@@ -133,13 +136,18 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <FavoritesProvider>
-          <CartProvider>
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <Outlet />
-            <WhatsAppButton />
-          </CartProvider>
-        </FavoritesProvider>
+        <ProductsProvider>
+          <OrdersProvider>
+            <FavoritesProvider>
+              <CartProvider>
+                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                <Outlet />
+                <WhatsAppButton />
+                <MobileTabBar />
+              </CartProvider>
+            </FavoritesProvider>
+          </OrdersProvider>
+        </ProductsProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

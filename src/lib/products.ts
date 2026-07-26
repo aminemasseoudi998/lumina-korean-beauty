@@ -59,7 +59,7 @@ export const categories: Category[] = [
   { slug: "brumes", name: "Brumes", description: "Fraîcheur minérale à vaporiser à tout moment." },
 ];
 
-export const products: Product[] = [
+export const seedProducts: Product[] = [
   {
     slug: "essence-ferment-de-riz",
     name: "Essence Ferment de Riz",
@@ -208,6 +208,24 @@ export const products: Product[] = [
   },
 ];
 
+// Images bundled with the app — the admin can pick from these when adding products.
+export const assetImages: { label: string; src: string }[] = [
+  { label: "Produit 1", src: product1 },
+  { label: "Produit 2", src: product2 },
+  { label: "Produit 3", src: product3 },
+  { label: "Produit 4", src: product4 },
+  { label: "Éclat peau", src: skinGlow },
+  { label: "Flacon héro", src: heroBottle },
+];
+
+// Live registry — kept in sync by ProductsProvider so non-React helpers
+// (e.g. cart/favorites resolving a product by slug) see admin edits.
+let live: Product[] = seedProducts.slice();
+
+export function _setLiveProducts(list: Product[]): void {
+  live = list;
+}
+
 // Tunisian Dinar with millimes (3 decimals) — e.g. 119 → "119,000 DT"
 export function formatPrice(value: number): string {
   return `${value.toFixed(3).replace(".", ",")} DT`;
@@ -219,7 +237,7 @@ export function discountPercent(product: Product): number {
 }
 
 export function getProduct(slug: string): Product | undefined {
-  return products.find((p) => p.slug === slug);
+  return live.find((p) => p.slug === slug);
 }
 
 export function getCategory(slug: string): Category | undefined {
@@ -229,11 +247,6 @@ export function getCategory(slug: string): Category | undefined {
 export function categoryName(slug: string): string {
   return getCategory(slug)?.name ?? slug;
 }
-
-export const featuredProducts = products.filter((p) => p.featured);
-export const promoProducts = products.filter((p) => p.oldPrice);
-export const bestSellers = products.filter((p) => p.bestSeller);
-export const newArrivals = products.filter((p) => p.isNew);
 
 export const availabilityLabel: Record<Availability, string> = {
   "en-stock": "En stock",

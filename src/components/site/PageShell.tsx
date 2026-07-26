@@ -16,6 +16,8 @@ export function PageShell({ children }: { children: ReactNode }) {
       <SiteNav />
       <main className="flex-1">{children}</main>
       <SiteFooter />
+      {/* Spacer so the fixed mobile tab bar never covers footer content */}
+      <div aria-hidden className="h-16 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} />
     </div>
   );
 }

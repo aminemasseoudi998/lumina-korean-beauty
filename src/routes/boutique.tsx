@@ -3,7 +3,8 @@ import { useMemo, useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { PageHeader, PageShell } from "@/components/site/PageShell";
 import { ProductCard } from "@/components/site/ProductCard";
-import { categories, categoryName, products, type Availability } from "@/lib/products";
+import { categories, categoryName, type Availability } from "@/lib/products";
+import { useProducts } from "@/lib/products-store";
 
 type BoutiqueSearch = {
   categorie?: string;
@@ -19,14 +20,15 @@ export const Route = createFileRoute("/boutique")({
 type DispoFilter = "tous" | Availability;
 type SortMode = "pertinence" | "prix-asc" | "prix-desc";
 
-const priceBounds = {
-  min: Math.min(...products.map((p) => p.price)),
-  max: Math.max(...products.map((p) => p.price)),
-};
-
 function Boutique() {
   const { categorie } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
+  const { products } = useProducts();
+
+  const priceBounds = {
+    min: products.length ? Math.min(...products.map((p) => p.price)) : 0,
+    max: products.length ? Math.max(...products.map((p) => p.price)) : 500,
+  };
 
   const [dispo, setDispo] = useState<DispoFilter>("tous");
   const [sort, setSort] = useState<SortMode>("pertinence");

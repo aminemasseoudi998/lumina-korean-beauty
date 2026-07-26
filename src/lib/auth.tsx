@@ -4,6 +4,8 @@ export type User = {
   firstName: string;
   lastName: string;
   email: string;
+  phone?: string;
+  isAdmin?: boolean;
 };
 
 type AuthContextValue = {
@@ -12,12 +14,23 @@ type AuthContextValue = {
   login: (email: string, password: string) => { ok: boolean; error?: string };
   register: (data: User & { password: string }) => { ok: boolean; error?: string };
   logout: () => void;
+  listUsers: () => User[];
+  removeUser: (email: string) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 const SESSION_KEY = "wglow-session";
 const USERS_KEY = "wglow-users";
+
+// Default administrator seeded on first load (front-end demo only).
+const ADMIN_SEED: StoredUser = {
+  firstName: "Admin",
+  lastName: "Wglow",
+  email: "admin@wglow.tn",
+  password: "admin123",
+  isAdmin: true,
+};
 
 type StoredUser = User & { password: string };
 
@@ -47,6 +60,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    // Ensure the admin account exists.
+    const users = readUsers();
+    if (!users.some((u) => u.email.toLowerCase() === ADMIN_SEED.email)) {
+      writeUsers([ADMIN_SEED, ...users]);
+    }
     try {
       const raw = window.localStorage.getItem(SESSION_KEY);
       if (raw) setUser(JSON.parse(raw));
@@ -98,9 +116,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => persistSession(null), [persistSession]);
 
+  const listUsers = useCallback<AuthContextValue["listUsers"]>(() => {
+    return readUsers().map(({ password: _pw, ...u }) => {
+      void _pw;
+      return u;
+    });
+  }, []);
+
+  const removeUser = useCallback<AuthContextValue["removeUser"]>((email) => {
+    writeUsers(readUsers().filter((u) => u.email.toLowerCase() !== email.toLowerCase()));
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ user, ready, login, register, logout }),
-    [user, ready, login, register, logout],
+    () => ({ user, ready, login, register, logout, listUsers, removeUser }),
+    [user, ready, login, register, logout, listUsers, removeUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

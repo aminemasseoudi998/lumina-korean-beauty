@@ -4,13 +4,8 @@ import { PageShell } from "@/components/site/PageShell";
 import { ProductCard } from "@/components/site/ProductCard";
 import { TrustBadges } from "@/components/site/TrustBadges";
 import { useCart } from "@/lib/cart";
-import {
-  availabilityLabel,
-  categoryName,
-  formatPrice,
-  getProduct,
-  products,
-} from "@/lib/products";
+import { availabilityLabel, categoryName, formatPrice } from "@/lib/products";
+import { useProducts } from "@/lib/products-store";
 
 export const Route = createFileRoute("/produit/$slug")({
   component: ProductPage,
@@ -18,7 +13,8 @@ export const Route = createFileRoute("/produit/$slug")({
 
 function ProductPage() {
   const { slug } = Route.useParams();
-  const product = getProduct(slug);
+  const { getBySlug, byCategory } = useProducts();
+  const product = getBySlug(slug);
   const { add } = useCart();
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
@@ -42,7 +38,7 @@ function ProductPage() {
   }
 
   const inStock = product.availability === "en-stock";
-  const related = products.filter((p) => p.category === product.category && p.slug !== product.slug).slice(0, 3);
+  const related = byCategory(product.category).filter((p) => p.slug !== product.slug).slice(0, 3);
 
   const handleAdd = () => {
     add(product.slug, qty);
@@ -224,8 +220,8 @@ function ProductPage() {
         )}
       </div>
 
-      {/* Sticky mobile add-to-cart */}
-      <div className="sticky bottom-0 z-40 border-t border-ink/10 bg-cream/95 px-5 py-3 backdrop-blur-md lg:hidden">
+      {/* Sticky mobile add-to-cart — sits above the mobile tab bar */}
+      <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-40 border-t border-ink/10 bg-cream/95 px-5 py-3 backdrop-blur-md md:bottom-0 lg:hidden">
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs text-taupe">{product.name}</p>

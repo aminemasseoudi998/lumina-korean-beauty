@@ -43,12 +43,21 @@ function LoginPage() {
           <h1 className="font-serif text-4xl italic sm:text-5xl">Bonjour, {user.firstName}.</h1>
           <p className="mt-4 text-sm text-taupe">Connecté avec {user.email}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
-              to="/favoris"
-              className="rounded-full bg-camel-deep px-8 py-3.5 text-sm font-medium text-cream transition-colors hover:bg-camel-dark"
-            >
-              Mes favoris
-            </Link>
+            {user.isAdmin ? (
+              <Link
+                to="/admin"
+                className="rounded-full bg-camel-deep px-8 py-3.5 text-sm font-medium text-cream transition-colors hover:bg-camel-dark"
+              >
+                Espace administrateur
+              </Link>
+            ) : (
+              <Link
+                to="/favoris"
+                className="rounded-full bg-camel-deep px-8 py-3.5 text-sm font-medium text-cream transition-colors hover:bg-camel-dark"
+              >
+                Mes favoris
+              </Link>
+            )}
             <button
               onClick={logout}
               className="inline-flex items-center justify-center gap-2 rounded-full border border-ink/20 px-8 py-3.5 text-sm font-medium transition-colors hover:bg-tint-deep"

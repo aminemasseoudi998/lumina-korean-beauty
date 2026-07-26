@@ -10,15 +10,8 @@ import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ProductCard } from "@/components/site/ProductCard";
 import { CommunityStories } from "@/components/site/CommunityStories";
-import {
-  bestSellers,
-  brands,
-  categories,
-  discountPercent,
-  formatPrice,
-  newArrivals,
-  promoProducts,
-} from "@/lib/products";
+import { brands, categories, discountPercent, formatPrice } from "@/lib/products";
+import { useProducts } from "@/lib/products-store";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -212,6 +205,7 @@ function Index() {
   const [scrollY, setScrollY] = useState(0);
   const [skin, setSkin] = useState<string | null>(null);
   const [motionOK, setMotionOK] = useState(false);
+  const { bestSellers, newArrivals, promoProducts } = useProducts();
   const hero = bestSellers[0];
 
   useEffect(() => {
@@ -767,6 +761,8 @@ function Index() {
       </section>
 
       <SiteFooter />
+      {/* Spacer so the fixed mobile tab bar never covers footer content */}
+      <div aria-hidden className="h-16 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} />
     </div>
   );
 }

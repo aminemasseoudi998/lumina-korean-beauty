@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AProposRouteImport } from './routes/a-propos'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as BoutiqueRouteImport } from './routes/boutique'
 import { Route as CommandeRouteImport } from './routes/commande'
@@ -19,6 +20,10 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FavorisRouteImport } from './routes/favoris'
 import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as PanierRouteImport } from './routes/panier'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminClientsRouteImport } from './routes/admin.clients'
+import { Route as AdminCommandesRouteImport } from './routes/admin.commandes'
+import { Route as AdminProduitsRouteImport } from './routes/admin.produits'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ProduitSlugRouteImport } from './routes/produit.$slug'
 
@@ -30,6 +35,11 @@ const IndexRoute = IndexRouteImport.update({
 const AProposRoute = AProposRouteImport.update({
   id: '/a-propos',
   path: '/a-propos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRoute = BlogRouteImport.update({
@@ -72,6 +82,26 @@ const PanierRoute = PanierRouteImport.update({
   path: '/panier',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminClientsRoute = AdminClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCommandesRoute = AdminCommandesRouteImport.update({
+  id: '/commandes',
+  path: '/commandes',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProduitsRoute = AdminProduitsRouteImport.update({
+  id: '/produits',
+  path: '/produits',
+  getParentRoute: () => AdminRoute,
+} as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -86,6 +116,7 @@ const ProduitSlugRoute = ProduitSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
+  '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/boutique': typeof BoutiqueRoute
   '/commande': typeof CommandeRoute
@@ -94,8 +125,12 @@ export interface FileRoutesByFullPath {
   '/favoris': typeof FavorisRoute
   '/inscription': typeof InscriptionRoute
   '/panier': typeof PanierRoute
+  '/admin/clients': typeof AdminClientsRoute
+  '/admin/commandes': typeof AdminCommandesRoute
+  '/admin/produits': typeof AdminProduitsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/produit/$slug': typeof ProduitSlugRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -108,13 +143,18 @@ export interface FileRoutesByTo {
   '/favoris': typeof FavorisRoute
   '/inscription': typeof InscriptionRoute
   '/panier': typeof PanierRoute
+  '/admin/clients': typeof AdminClientsRoute
+  '/admin/commandes': typeof AdminCommandesRoute
+  '/admin/produits': typeof AdminProduitsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/produit/$slug': typeof ProduitSlugRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/a-propos': typeof AProposRoute
+  '/admin': typeof AdminRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/boutique': typeof BoutiqueRoute
   '/commande': typeof CommandeRoute
@@ -123,14 +163,19 @@ export interface FileRoutesById {
   '/favoris': typeof FavorisRoute
   '/inscription': typeof InscriptionRoute
   '/panier': typeof PanierRoute
+  '/admin/clients': typeof AdminClientsRoute
+  '/admin/commandes': typeof AdminCommandesRoute
+  '/admin/produits': typeof AdminProduitsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/produit/$slug': typeof ProduitSlugRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/a-propos'
+    | '/admin'
     | '/blog'
     | '/boutique'
     | '/commande'
@@ -139,8 +184,12 @@ export interface FileRouteTypes {
     | '/favoris'
     | '/inscription'
     | '/panier'
+    | '/admin/clients'
+    | '/admin/commandes'
+    | '/admin/produits'
     | '/blog/$slug'
     | '/produit/$slug'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -153,12 +202,17 @@ export interface FileRouteTypes {
     | '/favoris'
     | '/inscription'
     | '/panier'
+    | '/admin/clients'
+    | '/admin/commandes'
+    | '/admin/produits'
     | '/blog/$slug'
     | '/produit/$slug'
+    | '/admin'
   id:
     | '__root__'
     | '/'
     | '/a-propos'
+    | '/admin'
     | '/blog'
     | '/boutique'
     | '/commande'
@@ -167,13 +221,18 @@ export interface FileRouteTypes {
     | '/favoris'
     | '/inscription'
     | '/panier'
+    | '/admin/clients'
+    | '/admin/commandes'
+    | '/admin/produits'
     | '/blog/$slug'
     | '/produit/$slug'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AProposRoute: typeof AProposRoute
+  AdminRoute: typeof AdminRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
   BoutiqueRoute: typeof BoutiqueRoute
   CommandeRoute: typeof CommandeRoute
@@ -199,6 +258,13 @@ declare module '@tanstack/react-router' {
       path: '/a-propos'
       fullPath: '/a-propos'
       preLoaderRoute: typeof AProposRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog': {
@@ -257,6 +323,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PanierRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/clients': {
+      id: '/admin/clients'
+      path: '/clients'
+      fullPath: '/admin/clients'
+      preLoaderRoute: typeof AdminClientsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/commandes': {
+      id: '/admin/commandes'
+      path: '/commandes'
+      fullPath: '/admin/commandes'
+      preLoaderRoute: typeof AdminCommandesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/produits': {
+      id: '/admin/produits'
+      path: '/produits'
+      fullPath: '/admin/produits'
+      preLoaderRoute: typeof AdminProduitsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/blog/$slug': {
       id: '/blog/$slug'
       path: '/$slug'
@@ -274,6 +368,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminClientsRoute: typeof AdminClientsRoute
+  AdminCommandesRoute: typeof AdminCommandesRoute
+  AdminProduitsRoute: typeof AdminProduitsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminClientsRoute: AdminClientsRoute,
+  AdminCommandesRoute: AdminCommandesRoute,
+  AdminProduitsRoute: AdminProduitsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface BlogRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
 }
@@ -287,6 +397,7 @@ const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AProposRoute: AProposRoute,
+  AdminRoute: AdminRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
   BoutiqueRoute: BoutiqueRoute,
   CommandeRoute: CommandeRoute,

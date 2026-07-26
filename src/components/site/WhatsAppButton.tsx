@@ -1,9 +1,15 @@
+import { useLocation } from "@tanstack/react-router";
+
 // Floating WhatsApp contact button — styled to match the beige/camel palette.
 const WHATSAPP_NUMBER = "21671000000"; // international format, no "+"
 const PREFILLED = "Bonjour Wglow ! J'aimerais des conseils sur vos produits coréens.";
 
 export function WhatsAppButton() {
+  const pathname = useLocation({ select: (l) => l.pathname });
   const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(PREFILLED)}`;
+
+  // Hide on product pages (sticky add-to-cart occupies the corner) and in the admin area.
+  if (pathname.startsWith("/produit/") || pathname.startsWith("/admin")) return null;
 
   return (
     <a
@@ -11,7 +17,7 @@ export function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Nous contacter sur WhatsApp"
-      className="group fixed bottom-5 right-5 z-50 flex items-center gap-0 overflow-hidden rounded-full bg-camel-deep py-3.5 pl-4 pr-4 text-cream shadow-lg ring-1 ring-ink/10 transition-all duration-500 hover:bg-camel-dark hover:pr-6 sm:bottom-7 sm:right-7"
+      className="group fixed right-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-50 flex items-center gap-0 overflow-hidden rounded-full bg-camel-deep py-3.5 pl-4 pr-4 text-cream shadow-lg ring-1 ring-ink/10 transition-all duration-500 hover:bg-camel-dark hover:pr-6 md:right-7 md:bottom-7"
     >
       {/* Soft pulse */}
       <span

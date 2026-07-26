@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { PageShell } from "@/components/site/PageShell";
 import { useCart, type CartLine } from "@/lib/cart";
 import { formatPrice } from "@/lib/products";
+import { useOrders } from "@/lib/orders";
 
 export const Route = createFileRoute("/commande")({
   component: CheckoutPage,
@@ -35,6 +36,7 @@ const labelClass = "mb-1.5 block text-[10px] font-medium uppercase tracking-[0.2
 
 function CheckoutPage() {
   const { lines, subtotal, clear } = useCart();
+  const { createOrder } = useOrders();
   const [payment, setPayment] = useState<PaymentMethod>("livraison");
   const [confirmed, setConfirmed] = useState<ConfirmedOrder | null>(null);
   const [form, setForm] = useState({
@@ -58,17 +60,44 @@ function CheckoutPage() {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (lines.length === 0) return;
-    const order: ConfirmedOrder = {
-      ref: `WG-${Date.now().toString(36).toUpperCase().slice(-6)}`,
+    const ref = `WG-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+
+    // Persist the order for the admin back-office (status starts "en-attente").
+    createOrder({
+      ref,
+      customer: {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        address: form.address,
+        zip: form.zip,
+        city: form.city,
+        country: form.country,
+        notes: form.notes,
+      },
+      items: lines.map((l: CartLine) => ({
+        slug: l.slug,
+        name: l.product.name,
+        qty: l.qty,
+        price: l.product.price,
+      })),
+      subtotal,
+      shipping,
+      total,
+      payment,
+    });
+
+    setConfirmed({
+      ref,
       name: `${form.firstName} ${form.lastName}`.trim(),
       email: form.email,
       address: `${form.address}, ${form.zip} ${form.city}, ${form.country}`,
       payment,
       lines: lines.map((l: CartLine) => ({ name: l.product.name, qty: l.qty, price: l.product.price })),
       total,
-    };
+    });
     clear();
-    setConfirmed(order);
     window.scrollTo({ top: 0 });
   };
 
@@ -271,7 +300,7 @@ function CheckoutPage() {
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <div className="rounded-lg border border-ink/10 bg-sand/40 p-6 sm:p-8">
               <h2 className="mb-5 font-serif text-2xl italic">Votre commande</h2>
-              <ul className="divide-y divide-ink/10">
+              <ul className="max-h-64 divide-y divide-ink/10 overflow-y-auto pr-1 sm:max-h-none sm:overflow-visible sm:pr-0">
                 {lines.map((l) => (
                   <li key={l.slug} className="flex gap-3 py-3">
                     <div className="aspect-square size-14 shrink-0 overflow-hidden rounded-md bg-sand">
