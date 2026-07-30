@@ -48,7 +48,7 @@ export function SiteNav() {
       <nav className="sticky top-0 z-50 border-b border-ink/5 bg-cream/70 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 sm:px-6 lg:px-12">
         <Link to="/" className="flex items-center" aria-label={BRAND}>
-          <img src={logo} alt={BRAND} className="h-11 w-auto sm:h-12" />
+          <img src={logo} alt={BRAND} className="h-12 w-auto sm:h-14" />
         </Link>
 
         <div className="hidden gap-8 text-xs uppercase tracking-[0.24em] md:flex lg:gap-10">
