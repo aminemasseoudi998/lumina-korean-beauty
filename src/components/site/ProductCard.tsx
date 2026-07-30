@@ -1,9 +1,25 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useCartSheet } from "@/lib/cart-sheet";
 import { useFavorites } from "@/lib/favorites";
 import { availabilityLabel, categoryName, discountPercent, formatPrice, type Product } from "@/lib/products";
+import v2 from "@/assets/2.mp4";
+import v3 from "@/assets/3.mp4";
+import v4 from "@/assets/4.mp4";
+import v5 from "@/assets/5.mp4";
+import v6 from "@/assets/6.mp4";
+import v7 from "@/assets/7.mp4";
+
+const productVideos: Record<string, string> = {
+  "essence-ferment-de-riz": v2,
+  "brume-rosee-de-montagne": v3,
+  "serum-ginseng-eclat": v4,
+  "masque-purifiant-argile": v5,
+  "creme-petale-yeon-hwa": v6,
+  "masque-de-nuit-gyeol-go": v7,
+};
 
 export function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
@@ -11,21 +27,36 @@ export function ProductCard({ product }: { product: Product }) {
   const { has, toggle } = useFavorites();
   const discount = discountPercent(product);
   const favorited = has(product.slug);
+  const [hovered, setHovered] = useState(false);
+  const video = productVideos[product.slug];
   return (
     <div className="group flex flex-col">
       <Link
         to="/produit/$slug"
         params={{ slug: product.slug }}
         className="relative mb-3 block aspect-[3/4] overflow-hidden rounded-lg bg-sand outline outline-1 -outline-offset-1 outline-black/5"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
       >
-        <img
-          src={product.image}
-          alt={product.name}
-          width={800}
-          height={1000}
-          loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-110"
-        />
+        {hovered && video ? (
+          <video
+            src={video}
+            muted
+            autoPlay
+            loop
+            playsInline
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <img
+            src={product.image}
+            alt={product.name}
+            width={800}
+            height={1000}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-110"
+          />
+        )}
         {/* Favorite toggle */}
         <button
           onClick={(e) => {
