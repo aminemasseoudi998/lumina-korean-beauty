@@ -64,7 +64,7 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
       </Link>
 
-      <div className="flex items-start gap-3">
+      <div className="flex flex-1 items-start gap-3">
         <div className="size-12 shrink-0 overflow-hidden rounded-md border border-ink/10 sm:size-14">
           <img
             src={product.image}
@@ -99,7 +99,7 @@ export function ProductCard({ product }: { product: Product }) {
 
       <button
         onClick={() => { add(product.slug); setCartOpen(true); }}
-        className="mt-3 w-full rounded-full border border-camel-deep/30 py-2.5 text-[10px] font-medium uppercase tracking-[0.2em] text-camel-deep transition-colors hover:bg-camel-deep hover:text-cream"
+        className="mt-auto w-full rounded-full border border-camel-deep/30 py-2.5 text-[10px] font-medium uppercase tracking-[0.2em] text-camel-deep transition-colors hover:bg-camel-deep hover:text-cream"
       >
         Ajouter au panier
       </button>

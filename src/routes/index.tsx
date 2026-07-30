@@ -1,10 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Banknote, RefreshCw, ShieldCheck, Sparkles, Truck } from "lucide-react";
+import { Banknote, Check, RefreshCw, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import skinGlow from "@/assets/skin-glow.jpg";
 import diagVideo from "@/assets/1.mp4";
 import heroImg1 from "@/assets/hero.avif";
 import heroImg2 from "@/assets/hero2.avif";
+import product1 from "@/assets/product-1.jpg";
+import product2 from "@/assets/product-2.jpg";
+import product3 from "@/assets/product-3.jpg";
+import product4 from "@/assets/product-4.jpg";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ProductCard } from "@/components/site/ProductCard";
@@ -356,15 +360,15 @@ function Index() {
 
       {/* Trust features */}
       <section className="mx-auto max-w-[1400px] px-5 pb-6 sm:px-6 lg:px-12">
-        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-ink/10 bg-ink/10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((f) => (
-            <div key={f.title} className="flex items-start gap-4 bg-tint p-5 sm:p-6">
+            <div key={f.title} className="flex flex-col items-center gap-3 rounded-xl bg-tint p-5 text-center sm:flex-row sm:items-start sm:text-left sm:p-6">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-champagne/70">
                 <f.icon className="size-5 text-camel-deep" strokeWidth={1.5} />
               </span>
               <div>
-                <h3 className="font-serif text-base sm:text-lg">{f.title}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-taupe">{f.body}</p>
+                <h3 className="font-serif text-sm font-medium sm:text-lg">{f.title}</h3>
+                <p className="mt-0.5 text-[11px] leading-relaxed text-taupe sm:mt-1 sm:text-xs">{f.body}</p>
               </div>
             </div>
           ))}
@@ -540,6 +544,99 @@ function Index() {
               </Reveal>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Nos packs */}
+      <section className="mx-auto max-w-[1400px] px-5 py-16 sm:px-6 sm:py-24 lg:px-12">
+        <Reveal>
+          <p className="mb-4 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.35em] text-camel-deep sm:tracking-[0.4em]">
+            <span className="h-px w-8 bg-camel" />
+            Sur-mesure
+          </p>
+          <h2 className="mb-2 font-serif text-4xl font-medium leading-[1.02] sm:text-5xl lg:text-7xl">
+            Nos <span className="italic text-taupe">packs.</span>
+          </h2>
+          <p className="mb-10 max-w-md text-taupe sm:mb-14 lg:mb-16">
+            Des routines pensées par nos expertes — chaque pack réunit les produits qui fonctionnent
+            ensemble, à un prix doux.
+          </p>
+        </Reveal>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            {
+              name: "Pack Découverte",
+              desc: "Les deux essentiels pour débuter le rituel coréen.",
+              products: ["Essence Ferment de Riz", "Brume Rosée de Montagne"],
+              price: 169,
+              original: 198,
+              image: product1,
+              color: "from-camel-deep/10 to-cream",
+            },
+            {
+              name: "Pack Routine Complète",
+              desc: "La séquence complète : essence, sérum & crème.",
+              products: ["Essence Ferment de Riz", "Sérum Ginseng Éclat", "Crème Pétale Yeon-hwa"],
+              price: 369,
+              original: 433,
+              image: product2,
+              color: "from-tint-deep to-cream",
+            },
+            {
+              name: "Pack Éclat de Nuit",
+              desc: "Réparation intensive et lumière au réveil.",
+              products: ["Masque de Nuit Gyeol-go", "Sérum Ginseng Éclat", "Essence Bambou Apaisante"],
+              price: 299,
+              original: 369,
+              image: product4,
+              color: "from-champagne/60 to-cream",
+            },
+          ].map((pack, i) => (
+            <Reveal key={pack.name} delay={i * 120}>
+              <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-ink/10 bg-cream transition-all hover:-translate-y-1 hover:shadow-lg">
+                <div className={`absolute inset-0 bg-gradient-to-br ${pack.color} opacity-60`} />
+                <div className="relative aspect-[4/3] overflow-hidden bg-sand">
+                  <img
+                    src={pack.image}
+                    alt={pack.name}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink/20 to-transparent" />
+                  <span className="absolute bottom-3 left-3 rounded-full bg-cream/90 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-ink backdrop-blur-sm">
+                    Économisez {Math.round((1 - pack.price / pack.original) * 100)}%
+                  </span>
+                </div>
+                <div className="relative flex flex-1 flex-col p-5 sm:p-6">
+                  <h3 className="font-serif text-xl font-medium sm:text-2xl">{pack.name}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-taupe">{pack.desc}</p>
+                  <div className="mt-4 flex flex-wrap items-start gap-1.5">
+                    {pack.products.map((name) => (
+                      <span
+                        key={name}
+                        className="rounded-full border border-ink/10 bg-ink/[0.03] px-2.5 py-1 text-[10px] font-medium text-taupe"
+                      >
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-auto flex flex-col gap-4 border-t border-ink/10 pt-4">
+                    <div className="flex items-baseline gap-2.5">
+                      <span className="font-serif text-2xl italic">{formatPrice(pack.price)}</span>
+                      <span className="font-serif text-sm italic text-taupe/70 line-through">{formatPrice(pack.original)}</span>
+                    </div>
+                    <Link
+                      to="/boutique"
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-camel-deep px-5 py-2.5 text-xs font-medium text-cream transition-all hover:bg-camel-dark"
+                    >
+                      <Check className="size-3.5" strokeWidth={2.5} />
+                      Choisir ce pack
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          ))}
         </div>
       </section>
 
