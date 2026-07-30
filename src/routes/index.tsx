@@ -1,15 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Banknote, RefreshCw, ShieldCheck, Sparkles, Truck } from "lucide-react";
-import heroBottle from "@/assets/hero-bottle.jpg";
 import skinGlow from "@/assets/skin-glow.jpg";
-import clip1 from "@/assets/1.mp4";
-import clip3 from "@/assets/3.mp4";
-import clip4 from "@/assets/4.mp4";
+import diagVideo from "@/assets/1.mp4";
+import heroImg1 from "@/assets/hero.avif";
+import heroImg2 from "@/assets/hero2.avif";
 import { SiteNav } from "@/components/site/SiteNav";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { ProductCard } from "@/components/site/ProductCard";
-import { CommunityStories } from "@/components/site/CommunityStories";
+
 import { brands, categories, discountPercent, formatPrice } from "@/lib/products";
 import { useProducts } from "@/lib/products-store";
 
@@ -34,6 +33,21 @@ const steps = [
 const skinTypes = ["Peau sèche", "Peau grasse", "Peau mixte", "Peau sensible", "Teint terne", "Peau mature"];
 
 const pressLogos = ["ELLE", "VOGUE", "Marie Claire", "COSMOPOLITAN", "Glamour", "GRAZIA"];
+
+const heroSlides = [
+  {
+    img: heroImg1,
+    eyebrow: "Séoul → Tunisie · Livraison 24h",
+    title: "Le Souffle Lumineux de la Rosée",
+    desc: "La maison de cosmétiques coréens authentiques en Tunisie. Les meilleures marques, livrées en 24h avec paiement à la livraison.",
+  },
+  {
+    img: heroImg2,
+    eyebrow: "Rituel Coréen · Nouvelle Collection",
+    title: "L'Élixir de la Jeunesse Révélé",
+    desc: "Des formules ancestrales coréennes infusées de ginseng rouge et d'eau de riz fermentée pour une peau lumineuse et régénérée.",
+  },
+];
 
 function useReveal<T extends HTMLElement>() {
   const ref = useRef<T>(null);
@@ -202,18 +216,13 @@ function SectionHeading({
 }
 
 function Index() {
-  const [scrollY, setScrollY] = useState(0);
   const [skin, setSkin] = useState<string | null>(null);
-  const [motionOK, setMotionOK] = useState(false);
   const { bestSellers, newArrivals, promoProducts } = useProducts();
-  const hero = bestSellers[0];
+  const [slide, setSlide] = useState(0);
 
   useEffect(() => {
-    setMotionOK(!prefersReducedMotion());
-    if (prefersReducedMotion()) return;
-    const on = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", on, { passive: true });
-    return () => window.removeEventListener("scroll", on);
+    const t = setInterval(() => setSlide((s) => (s + 1) % 2), 5000);
+    return () => clearInterval(t);
   }, []);
 
   return (
@@ -245,145 +254,103 @@ function Index() {
         <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-tint-deep to-transparent sm:w-24" />
       </div>
 
-      {/* Hero */}
-      <section id="top" className="relative overflow-hidden pt-12 pb-16 sm:pt-16 lg:pt-20 lg:pb-24">
-        <div className="mx-auto max-w-[1400px] px-5 sm:px-6 lg:px-12">
-          <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-16">
-            {/* Copy */}
-            <div className="lg:col-span-5">
-              <Reveal>
-                <p className="mb-5 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.35em] text-camel-deep sm:tracking-[0.4em]">
-                  <span className="h-px w-8 bg-camel" />
-                  Séoul → Tunisie · Livraison 24h
-                </p>
-              </Reveal>
-
-              <SplitHeading
-                text="Le Souffle Lumineux de la Rosée"
-                className="max-w-[18ch] font-serif text-[clamp(2.1rem,4.4vw,3.75rem)] font-medium italic leading-[1.04] text-balance"
-              />
-
-              <Reveal delay={500}>
-                <p className="mt-6 max-w-[46ch] leading-relaxed text-taupe">
-                  La maison de cosmétiques coréens authentiques en Tunisie. Les meilleures marques,
-                  livrées en 24h avec paiement à la livraison.
-                </p>
-              </Reveal>
-
-              <Reveal delay={620}>
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                  <Link
-                    to="/boutique"
-                    className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full bg-camel-deep px-8 py-3.5 text-sm font-medium text-cream ring-1 ring-camel-deep"
-                  >
-                    <span className="relative z-10">Découvrir la boutique</span>
-                    <span className="relative z-10 transition-transform group-hover:translate-x-1">→</span>
-                    <span className="absolute inset-0 -translate-x-full bg-camel-dark transition-transform duration-500 group-hover:translate-x-0" />
-                  </Link>
-                  <a
-                    href="#diagnostic"
-                    className="inline-flex items-center justify-center gap-3 rounded-full border border-camel-deep/30 px-8 py-3.5 text-sm font-medium text-camel-deep transition-colors hover:bg-tint-deep"
-                  >
-                    Diagnostic de peau
-                  </a>
-                </div>
-              </Reveal>
-
-              <Reveal delay={760}>
-                <dl className="mt-10 grid grid-cols-3 gap-4 border-t border-ink/10 pt-6">
-                  {[
-                    { v: "24h", l: "Livraison Tunisie" },
-                    { v: "8+", l: "Marques coréennes" },
-                    { v: "100%", l: "Authentique" },
-                  ].map((s) => (
-                    <div key={s.l}>
-                      <dt className="font-serif text-2xl italic sm:text-3xl">{s.v}</dt>
-                      <dd className="mt-1 text-[9px] uppercase tracking-[0.18em] text-taupe sm:text-[10px] sm:tracking-[0.22em]">
-                        {s.l}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              </Reveal>
-            </div>
-
-            {/* Media — animated motion collage (cosmetics & skin) */}
-            <Reveal delay={200} className="lg:col-span-7">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-6 sm:gap-4">
-                {/* Primary tall clip + floating best-seller card */}
-                <div className="relative sm:col-span-4">
-                  <div
-                    className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-sand ring-1 ring-ink/5"
-                    style={{ transform: `translate3d(0, ${scrollY * 0.04}px, 0)`, willChange: "transform" }}
-                  >
-                    <video
-                      autoPlay={motionOK}
-                      muted
-                      loop
-                      playsInline
-                      poster={skinGlow}
-                      className="h-full w-full object-cover"
-                    >
-                      <source src={clip1} type="video/mp4" />
-                    </video>
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/45 via-transparent to-transparent" />
-                    <span className="absolute left-4 top-4 flex items-center gap-2 rounded-full bg-cream/85 px-3 py-1.5 text-[9px] font-medium uppercase tracking-[0.22em] text-ink backdrop-blur-md">
-                      <span className="size-1.5 animate-pulse rounded-full bg-camel-deep" />
-                      Éclat
-                    </span>
-
-                    {hero && (
-                      <Link
-                        to="/produit/$slug"
-                        params={{ slug: hero.slug }}
-                        className="group absolute inset-x-4 bottom-4 flex items-center gap-3 rounded-xl bg-cream/95 p-3 shadow-lg ring-1 ring-ink/5 backdrop-blur-md sm:gap-4 sm:p-4"
-                      >
-                        <div className="aspect-square w-14 shrink-0 overflow-hidden rounded-lg bg-sand sm:w-16">
-                          <img src={hero.image} alt={hero.name} className="h-full w-full object-cover" loading="lazy" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-camel-deep">
-                            Best-seller · {hero.brand}
-                          </p>
-                          <p className="mt-0.5 truncate font-serif text-base sm:text-lg">{hero.name}</p>
-                          <p className="mt-0.5 font-serif text-sm italic">{formatPrice(hero.price)}</p>
-                        </div>
-                        <span className="shrink-0 text-camel-deep transition-transform group-hover:translate-x-1">→</span>
-                      </Link>
-                    )}
-                  </div>
-                </div>
-
-                {/* Two stacked accent clips */}
-                <div className="grid grid-cols-2 gap-3 sm:col-span-2 sm:grid-cols-1 sm:grid-rows-2 sm:gap-4">
-                  {[
-                    { src: clip3, poster: heroBottle, label: "Textures" },
-                    { src: clip4, poster: skinGlow, label: "Rituel" },
-                  ].map((tile) => (
-                    <div
-                      key={tile.label}
-                      className="group relative aspect-square overflow-hidden rounded-2xl bg-sand ring-1 ring-ink/5 sm:aspect-auto"
-                    >
-                      <video
-                        autoPlay={motionOK}
-                        muted
-                        loop
-                        playsInline
-                        poster={tile.poster}
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
-                      >
-                        <source src={tile.src} type="video/mp4" />
-                      </video>
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent" />
-                      <span className="absolute bottom-3 left-3 font-serif text-sm italic text-cream">
-                        {tile.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Reveal>
+      {/* Hero — full-bleed crossfading images with changing text */}
+      <section id="top" className="relative min-h-[600px] overflow-hidden bg-ink lg:min-h-[85vh]">
+        {heroSlides.map((s, i) => (
+          <div
+            key={i}
+            className="absolute inset-0 transition-all duration-[1600ms] ease-in-out will-change-[opacity,transform]"
+            style={{
+              opacity: slide === i ? 1 : 0,
+              transform: slide === i ? "scale(1)" : "scale(1.06)",
+            }}
+          >
+            <img src={s.img} alt="" className="h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-r from-ink/70 via-ink/30 to-transparent" />
           </div>
+        ))}
+
+        <span className="absolute left-5 top-5 z-20 flex items-center gap-2 rounded-full bg-cream/85 px-3 py-1.5 text-[9px] font-medium uppercase tracking-[0.22em] text-ink backdrop-blur-md sm:left-8 sm:top-8">
+          <span className="size-1.5 animate-pulse rounded-full bg-camel-deep" />
+          Éclat
+        </span>
+
+        <div className="absolute inset-0 z-10">
+          <div className="mx-auto flex h-full max-w-[1400px] items-center px-5 sm:px-6 lg:px-12">
+            <div className="w-full max-w-xl">
+              <div className="relative">
+                {heroSlides.map((s, i) => (
+                  <div
+                    key={i}
+                    className="transition-all duration-[1000ms] ease-in-out"
+                    style={{
+                      opacity: slide === i ? 1 : 0,
+                      transform: slide === i ? "translateY(0)" : "translateY(24px)",
+                      position: slide === i ? "relative" : "absolute",
+                      inset: 0,
+                      pointerEvents: slide === i ? "auto" : "none",
+                    }}
+                  >
+                    <p className="mb-5 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.35em] text-cream/70 sm:tracking-[0.4em]">
+                      <span className="h-px w-8 bg-cream/30" />
+                      {s.eyebrow}
+                    </p>
+                    <h1 className="max-w-[18ch] font-serif text-[clamp(2.1rem,4.4vw,3.75rem)] font-medium italic leading-[1.04] text-balance text-cream">
+                      {s.title}
+                    </h1>
+                    <p className="mt-6 max-w-[46ch] leading-relaxed text-cream/60">
+                      {s.desc}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="relative mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <Link
+                  to="/boutique"
+                  className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full bg-camel-deep px-8 py-3.5 text-sm font-medium text-cream ring-1 ring-camel-deep"
+                >
+                  <span className="relative z-10">Découvrir la boutique</span>
+                  <span className="relative z-10 transition-transform group-hover:translate-x-1">→</span>
+                  <span className="absolute inset-0 -translate-x-full bg-camel-dark transition-transform duration-500 group-hover:translate-x-0" />
+                </Link>
+                <a
+                  href="#diagnostic"
+                  className="inline-flex items-center justify-center gap-3 rounded-full border border-cream/30 px-8 py-3.5 text-sm font-medium text-cream transition-colors hover:bg-cream/10"
+                >
+                  Diagnostic de peau
+                </a>
+              </div>
+
+              <dl className="relative mt-10 grid grid-cols-3 gap-4 border-t border-cream/20 pt-6">
+                {[
+                  { v: "24h", l: "Livraison Tunisie" },
+                  { v: "8+", l: "Marques coréennes" },
+                  { v: "100%", l: "Authentique" },
+                ].map((s) => (
+                  <div key={s.l}>
+                    <dt className="font-serif text-2xl italic sm:text-3xl text-cream">{s.v}</dt>
+                    <dd className="mt-1 text-[9px] uppercase tracking-[0.18em] text-cream/60 sm:text-[10px] sm:tracking-[0.22em]">
+                      {s.l}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute bottom-8 left-1/2 z-20 -translate-x-1/2 flex items-center gap-3">
+          {[0, 1].map((i) => (
+            <button
+              key={i}
+              onClick={() => setSlide(i)}
+              className={`h-1.5 rounded-full transition-all duration-500 ${
+                slide === i ? "w-8 bg-cream" : "w-1.5 bg-cream/40 hover:bg-cream/60"
+              }`}
+              aria-label={`Image ${i + 1}`}
+            />
+          ))}
         </div>
       </section>
 
@@ -578,10 +545,17 @@ function Index() {
 
       {/* Diagnostic de peau */}
       <section id="diagnostic" className="mx-auto max-w-[1400px] px-5 py-16 sm:px-6 sm:py-24 lg:px-12">
-        <div className="grid grid-cols-1 items-stretch gap-6 overflow-hidden rounded-2xl border border-ink/10 lg:grid-cols-2">
-          <div className="relative min-h-[280px] overflow-hidden bg-sand lg:min-h-full">
-            <img src={skinGlow} alt="Diagnostic de peau Wglow" className="h-full w-full object-cover" loading="lazy" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent" />
+        <div className="grid grid-cols-1 gap-6 overflow-hidden rounded-2xl border border-ink/10 lg:grid-cols-2 lg:items-stretch">
+          <div className="relative min-h-56 overflow-hidden bg-ink/5 sm:min-h-64">
+            <video
+              src={diagVideo}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="absolute inset-0 h-full w-full object-contain"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/30 to-transparent" />
           </div>
           <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-14">
             <p className="mb-4 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.35em] text-taupe sm:tracking-[0.4em]">
@@ -623,9 +597,6 @@ function Index() {
           </div>
         </div>
       </section>
-
-      {/* Community stories — video reels */}
-      <CommunityStories />
 
       {/* Philosophy */}
       <section id="about" className="relative overflow-hidden bg-sand/50 py-20 sm:py-28 lg:py-40">

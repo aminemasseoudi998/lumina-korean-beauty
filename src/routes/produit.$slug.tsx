@@ -4,6 +4,7 @@ import { PageShell } from "@/components/site/PageShell";
 import { ProductCard } from "@/components/site/ProductCard";
 import { TrustBadges } from "@/components/site/TrustBadges";
 import { useCart } from "@/lib/cart";
+import { useCartSheet } from "@/lib/cart-sheet";
 import { availabilityLabel, categoryName, formatPrice } from "@/lib/products";
 import { useProducts } from "@/lib/products-store";
 
@@ -16,6 +17,7 @@ function ProductPage() {
   const { getBySlug, byCategory } = useProducts();
   const product = getBySlug(slug);
   const { add } = useCart();
+  const { setOpen: setCartOpen } = useCartSheet();
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const [added, setAdded] = useState(false);
@@ -43,6 +45,7 @@ function ProductPage() {
   const handleAdd = () => {
     add(product.slug, qty);
     setAdded(true);
+    setCartOpen(true);
     setTimeout(() => setAdded(false), 2000);
   };
 
@@ -154,13 +157,6 @@ function ProductPage() {
                 </span>
               </button>
             </div>
-
-            <Link
-              to="/panier"
-              className="mt-4 inline-flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-taupe transition-colors hover:text-ink"
-            >
-              Voir le panier <span>→</span>
-            </Link>
 
             {/* Reassurance */}
             <div className="mt-8">

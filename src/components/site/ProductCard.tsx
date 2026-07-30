@@ -1,11 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { Heart } from "lucide-react";
 import { useCart } from "@/lib/cart";
+import { useCartSheet } from "@/lib/cart-sheet";
 import { useFavorites } from "@/lib/favorites";
 import { availabilityLabel, categoryName, discountPercent, formatPrice, type Product } from "@/lib/products";
 
 export function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
+  const { setOpen: setCartOpen } = useCartSheet();
   const { has, toggle } = useFavorites();
   const discount = discountPercent(product);
   const favorited = has(product.slug);
@@ -14,7 +16,7 @@ export function ProductCard({ product }: { product: Product }) {
       <Link
         to="/produit/$slug"
         params={{ slug: product.slug }}
-        className="relative mb-4 block aspect-[3/4] overflow-hidden rounded-md bg-sand outline outline-1 -outline-offset-1 outline-black/5"
+        className="relative mb-3 block aspect-[3/4] overflow-hidden rounded-lg bg-sand outline outline-1 -outline-offset-1 outline-black/5"
       >
         <img
           src={product.image}
@@ -24,7 +26,6 @@ export function ProductCard({ product }: { product: Product }) {
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-110"
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/25 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
         {/* Favorite toggle */}
         <button
           onClick={(e) => {
@@ -63,28 +64,42 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
       </Link>
 
-      <p className="text-[9px] font-medium uppercase tracking-[0.22em] text-ink sm:text-[10px] sm:tracking-[0.24em]">
-        {product.brand}
-      </p>
-      <p className="mt-0.5 text-[9px] uppercase tracking-[0.2em] text-taupe sm:text-[10px]">
-        {categoryName(product.category)} · {product.size}
-      </p>
-      <h3 className="mt-1 font-serif text-lg sm:text-xl">
-        <Link to="/produit/$slug" params={{ slug: product.slug }} className="hover:text-camel-deep">
-          {product.name}
-        </Link>
-      </h3>
-      <div className="mt-1 flex items-baseline gap-2">
-        <span className="font-serif text-base italic sm:text-lg">{formatPrice(product.price)}</span>
-        {product.oldPrice && (
-          <span className="font-serif text-sm italic text-taupe/70 line-through">
-            {formatPrice(product.oldPrice)}
-          </span>
-        )}
+      <div className="flex items-start gap-3">
+        <div className="size-12 shrink-0 overflow-hidden rounded-md border border-ink/10 sm:size-14">
+          <img
+            src={product.image}
+            alt=""
+            width={100}
+            height={100}
+            className="h-full w-full object-cover"
+          />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[9px] font-medium uppercase tracking-[0.22em] text-ink sm:text-[10px] sm:tracking-[0.24em]">
+            {product.brand}
+          </p>
+          <p className="mt-0.5 text-[9px] uppercase tracking-[0.2em] text-taupe sm:text-[10px]">
+            {categoryName(product.category)} · {product.size}
+          </p>
+          <h3 className="mt-1 font-serif text-base sm:text-lg">
+            <Link to="/produit/$slug" params={{ slug: product.slug }} className="hover:text-camel-deep">
+              {product.name}
+            </Link>
+          </h3>
+          <div className="mt-1 flex items-baseline gap-2">
+            <span className="font-serif text-sm italic sm:text-base">{formatPrice(product.price)}</span>
+            {product.oldPrice && (
+              <span className="font-serif text-xs italic text-taupe/70 line-through sm:text-sm">
+                {formatPrice(product.oldPrice)}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
+
       <button
-        onClick={() => add(product.slug)}
-        className="mt-4 w-full rounded-full border border-camel-deep/30 py-2.5 text-[10px] font-medium uppercase tracking-[0.2em] text-camel-deep transition-colors hover:bg-camel-deep hover:text-cream"
+        onClick={() => { add(product.slug); setCartOpen(true); }}
+        className="mt-3 w-full rounded-full border border-camel-deep/30 py-2.5 text-[10px] font-medium uppercase tracking-[0.2em] text-camel-deep transition-colors hover:bg-camel-deep hover:text-cream"
       >
         Ajouter au panier
       </button>

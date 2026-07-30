@@ -15,10 +15,13 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as BoutiqueRouteImport } from './routes/boutique'
 import { Route as CommandeRouteImport } from './routes/commande'
+import { Route as ConfidentialiteRouteImport } from './routes/confidentialite'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FavorisRouteImport } from './routes/favoris'
 import { Route as InscriptionRouteImport } from './routes/inscription'
+import { Route as LivraisonRouteImport } from './routes/livraison'
+import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as PanierRouteImport } from './routes/panier'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminClientsRouteImport } from './routes/admin.clients'
@@ -57,6 +60,11 @@ const CommandeRoute = CommandeRouteImport.update({
   path: '/commande',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfidentialiteRoute = ConfidentialiteRouteImport.update({
+  id: '/confidentialite',
+  path: '/confidentialite',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConnexionRoute = ConnexionRouteImport.update({
   id: '/connexion',
   path: '/connexion',
@@ -75,6 +83,16 @@ const FavorisRoute = FavorisRouteImport.update({
 const InscriptionRoute = InscriptionRouteImport.update({
   id: '/inscription',
   path: '/inscription',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LivraisonRoute = LivraisonRouteImport.update({
+  id: '/livraison',
+  path: '/livraison',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
+  id: '/mentions-legales',
+  path: '/mentions-legales',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PanierRoute = PanierRouteImport.update({
@@ -120,10 +138,13 @@ export interface FileRoutesByFullPath {
   '/blog': typeof BlogRouteWithChildren
   '/boutique': typeof BoutiqueRoute
   '/commande': typeof CommandeRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/contact': typeof ContactRoute
   '/favoris': typeof FavorisRoute
   '/inscription': typeof InscriptionRoute
+  '/livraison': typeof LivraisonRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/panier': typeof PanierRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/commandes': typeof AdminCommandesRoute
@@ -138,10 +159,13 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogRouteWithChildren
   '/boutique': typeof BoutiqueRoute
   '/commande': typeof CommandeRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/contact': typeof ContactRoute
   '/favoris': typeof FavorisRoute
   '/inscription': typeof InscriptionRoute
+  '/livraison': typeof LivraisonRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/panier': typeof PanierRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/commandes': typeof AdminCommandesRoute
@@ -158,10 +182,13 @@ export interface FileRoutesById {
   '/blog': typeof BlogRouteWithChildren
   '/boutique': typeof BoutiqueRoute
   '/commande': typeof CommandeRoute
+  '/confidentialite': typeof ConfidentialiteRoute
   '/connexion': typeof ConnexionRoute
   '/contact': typeof ContactRoute
   '/favoris': typeof FavorisRoute
   '/inscription': typeof InscriptionRoute
+  '/livraison': typeof LivraisonRoute
+  '/mentions-legales': typeof MentionsLegalesRoute
   '/panier': typeof PanierRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/commandes': typeof AdminCommandesRoute
@@ -179,10 +206,13 @@ export interface FileRouteTypes {
     | '/blog'
     | '/boutique'
     | '/commande'
+    | '/confidentialite'
     | '/connexion'
     | '/contact'
     | '/favoris'
     | '/inscription'
+    | '/livraison'
+    | '/mentions-legales'
     | '/panier'
     | '/admin/clients'
     | '/admin/commandes'
@@ -197,10 +227,13 @@ export interface FileRouteTypes {
     | '/blog'
     | '/boutique'
     | '/commande'
+    | '/confidentialite'
     | '/connexion'
     | '/contact'
     | '/favoris'
     | '/inscription'
+    | '/livraison'
+    | '/mentions-legales'
     | '/panier'
     | '/admin/clients'
     | '/admin/commandes'
@@ -216,10 +249,13 @@ export interface FileRouteTypes {
     | '/blog'
     | '/boutique'
     | '/commande'
+    | '/confidentialite'
     | '/connexion'
     | '/contact'
     | '/favoris'
     | '/inscription'
+    | '/livraison'
+    | '/mentions-legales'
     | '/panier'
     | '/admin/clients'
     | '/admin/commandes'
@@ -236,10 +272,13 @@ export interface RootRouteChildren {
   BlogRoute: typeof BlogRouteWithChildren
   BoutiqueRoute: typeof BoutiqueRoute
   CommandeRoute: typeof CommandeRoute
+  ConfidentialiteRoute: typeof ConfidentialiteRoute
   ConnexionRoute: typeof ConnexionRoute
   ContactRoute: typeof ContactRoute
   FavorisRoute: typeof FavorisRoute
   InscriptionRoute: typeof InscriptionRoute
+  LivraisonRoute: typeof LivraisonRoute
+  MentionsLegalesRoute: typeof MentionsLegalesRoute
   PanierRoute: typeof PanierRoute
   ProduitSlugRoute: typeof ProduitSlugRoute
 }
@@ -288,6 +327,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommandeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/confidentialite': {
+      id: '/confidentialite'
+      path: '/confidentialite'
+      fullPath: '/confidentialite'
+      preLoaderRoute: typeof ConfidentialiteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/connexion': {
       id: '/connexion'
       path: '/connexion'
@@ -314,6 +360,20 @@ declare module '@tanstack/react-router' {
       path: '/inscription'
       fullPath: '/inscription'
       preLoaderRoute: typeof InscriptionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/livraison': {
+      id: '/livraison'
+      path: '/livraison'
+      fullPath: '/livraison'
+      preLoaderRoute: typeof LivraisonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentions-legales': {
+      id: '/mentions-legales'
+      path: '/mentions-legales'
+      fullPath: '/mentions-legales'
+      preLoaderRoute: typeof MentionsLegalesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/panier': {
@@ -401,10 +461,13 @@ const rootRouteChildren: RootRouteChildren = {
   BlogRoute: BlogRouteWithChildren,
   BoutiqueRoute: BoutiqueRoute,
   CommandeRoute: CommandeRoute,
+  ConfidentialiteRoute: ConfidentialiteRoute,
   ConnexionRoute: ConnexionRoute,
   ContactRoute: ContactRoute,
   FavorisRoute: FavorisRoute,
   InscriptionRoute: InscriptionRoute,
+  LivraisonRoute: LivraisonRoute,
+  MentionsLegalesRoute: MentionsLegalesRoute,
   PanierRoute: PanierRoute,
   ProduitSlugRoute: ProduitSlugRoute,
 }

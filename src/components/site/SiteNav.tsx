@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Heart, ShoppingBag, User } from "lucide-react";
 import { useCart } from "@/lib/cart";
+import { useCartSheet } from "@/lib/cart-sheet";
 import { useFavorites } from "@/lib/favorites";
 import { useAuth } from "@/lib/auth";
 import logo from "@/assets/logo.png";
@@ -19,6 +20,7 @@ export function SiteNav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { count } = useCart();
   const { count: favCount } = useFavorites();
+  const { setOpen: setCartOpen } = useCartSheet();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -84,10 +86,10 @@ export function SiteNav() {
             )}
           </Link>
 
-          <Link
-            to="/panier"
+          <button
+            onClick={() => setCartOpen(true)}
             aria-label="Mon panier"
-            className="relative transition-colors hover:text-taupe"
+            className="relative cursor-pointer transition-colors hover:text-taupe"
           >
             <ShoppingBag className="size-5" strokeWidth={1.6} />
             {count > 0 && (
@@ -95,7 +97,7 @@ export function SiteNav() {
                 {count}
               </span>
             )}
-          </Link>
+          </button>
 
           <button
             aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
@@ -142,13 +144,12 @@ export function SiteNav() {
           >
             Favoris ({favCount})
           </Link>
-          <Link
-            to="/panier"
-            onClick={() => setMenuOpen(false)}
-            className="border-b border-ink/5 py-3 font-serif text-2xl italic transition-colors hover:text-taupe"
+          <button
+            onClick={() => { setMenuOpen(false); setCartOpen(true); }}
+            className="w-full border-b border-ink/5 py-3 text-left font-serif text-2xl italic transition-colors hover:text-taupe"
           >
             Panier ({count})
-          </Link>
+          </button>
           <Link
             to="/connexion"
             onClick={() => setMenuOpen(false)}

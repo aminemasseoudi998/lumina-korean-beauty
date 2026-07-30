@@ -139,7 +139,7 @@ export const seedProducts: Product[] = [
     category: "serums",
     size: "30ml",
     price: 165,
-    image: skinGlow,
+    image: product2,
     gallery: [skinGlow, product1, heroBottle],
     availability: "en-stock",
     tag: null,

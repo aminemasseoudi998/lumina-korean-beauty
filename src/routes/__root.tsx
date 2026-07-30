@@ -11,12 +11,14 @@ import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { CartProvider } from "../lib/cart";
+import { CartSheetProvider } from "../lib/cart-sheet";
 import { FavoritesProvider } from "../lib/favorites";
 import { AuthProvider } from "../lib/auth";
 import { ProductsProvider } from "../lib/products-store";
 import { OrdersProvider } from "../lib/orders";
 import { WhatsAppButton } from "../components/site/WhatsAppButton";
 import { MobileTabBar } from "../components/site/MobileTabBar";
+import { CartSheet } from "../components/site/CartSheet";
 
 function NotFoundComponent() {
   return (
@@ -140,10 +142,13 @@ function RootComponent() {
           <OrdersProvider>
             <FavoritesProvider>
               <CartProvider>
-                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-                <Outlet />
-                <WhatsAppButton />
-                <MobileTabBar />
+                <CartSheetProvider>
+                  {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                  <Outlet />
+                  <WhatsAppButton />
+                  <MobileTabBar />
+                  <CartSheet />
+                </CartSheetProvider>
               </CartProvider>
             </FavoritesProvider>
           </OrdersProvider>
