@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { useCartSheet } from "@/lib/cart-sheet";
 import { useFavorites } from "@/lib/favorites";
 import { availabilityLabel, categoryName, discountPercent, formatPrice, type Product } from "@/lib/products";
+import { clearActiveVideoSlug, getActiveVideoSlug, setActiveVideoSlug, subscribeActiveVideo } from "@/lib/video-hover";
 import v2 from "@/assets/2.mp4";
 import v3 from "@/assets/3.mp4";
 import v4 from "@/assets/4.mp4";
@@ -28,33 +29,118 @@ export function ProductCard({ product }: { product: Product }) {
   const discount = discountPercent(product);
   const favorited = has(product.slug);
   const [hovered, setHovered] = useState(false);
+  const [videoRevealed, setVideoRevealed] = useState(false);
+  const [activeSlug, setActiveSlug] = useState<string | null>(getActiveVideoSlug());
   const video = productVideos[product.slug];
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const suppressNavigation = useRef(false);
+
+  // Follow the page-wide active video; when another card takes over, reset this one.
+  useEffect(() => {
+    const unsubscribe = subscribeActiveVideo((slug) => {
+      setActiveSlug(slug);
+      if (slug !== product.slug) {
+        setVideoRevealed(false);
+        setHovered(false);
+      }
+    });
+    return () => {
+      unsubscribe();
+      clearActiveVideoSlug(product.slug);
+    };
+  }, [product.slug]);
+
+  const wantVideo = Boolean(video && (hovered || videoRevealed));
+
+  // Claim / release the single active slot — clearing only if we own it.
+  useEffect(() => {
+    if (wantVideo) {
+      setActiveVideoSlug(product.slug);
+    } else {
+      clearActiveVideoSlug(product.slug);
+    }
+  }, [wantVideo, product.slug]);
+
+  const showVideo = Boolean(video && activeSlug === product.slug);
+
+  // Play / pause the video when visibility toggles.
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+    if (showVideo) {
+      el.play().catch(() => {});
+    } else {
+      el.pause();
+      el.currentTime = 0;
+    }
+  }, [showVideo]);
+
+  // Stop the video as soon as the card leaves the viewport (scroll away).
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) {
+          setHovered(false);
+          setVideoRevealed(false);
+        }
+      },
+      { threshold: 0.15 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // Touch: show the video the instant the finger lands (no release needed).
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (video && e.pointerType !== "mouse" && !videoRevealed) {
+      setVideoRevealed(true);
+      suppressNavigation.current = true;
+    }
+  };
+
+  // Touch: swallow the click that revealed the video; the next tap navigates.
+  const handleClick = (e: React.MouseEvent) => {
+    if (suppressNavigation.current) {
+      suppressNavigation.current = false;
+      e.preventDefault();
+    }
+  };
+
   return (
-    <div className="group flex flex-col">
+    <div ref={cardRef} className="group flex h-full flex-col">
       <Link
         to="/produit/$slug"
         params={{ slug: product.slug }}
         className="relative mb-3 block aspect-[3/4] overflow-hidden rounded-lg bg-sand outline outline-1 -outline-offset-1 outline-black/5"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        onPointerDown={handlePointerDown}
+        onClick={handleClick}
       >
-        {hovered && video ? (
+        <img
+          src={product.image}
+          alt={product.name}
+          width={800}
+          height={1000}
+          loading="lazy"
+          className={`h-full w-full object-cover transition-all duration-[1600ms] ease-out group-hover:scale-110 ${
+            showVideo ? "opacity-0" : "opacity-100"
+          }`}
+        />
+        {video && (
           <video
+            ref={videoRef}
             src={video}
             muted
-            autoPlay
             loop
             playsInline
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <img
-            src={product.image}
-            alt={product.name}
-            width={800}
-            height={1000}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-[1600ms] ease-out group-hover:scale-110"
+            preload="auto"
+            className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
+              showVideo ? "opacity-100" : "opacity-0"
+            }`}
           />
         )}
         {/* Favorite toggle */}
